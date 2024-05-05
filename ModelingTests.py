@@ -7,7 +7,8 @@ data = pd.read_csv('proj-data.csv')
 
 #BLOCO CHATGPT
 
-data.dropna(inplace=True)  # Drop rows with missing values or use imputation techniques
+data.dropna(thresh=3, subset=['T3 measured:', 'TT4 measured:', 'T4U measured:', 'FTI measured:', 'TBG measured:'], inplace=True)  # Drop rows with missing values or use imputation techniques
+data.dropna(axis=1, thresh=3669, inplace=True)  # Drop columns with missing values or use imputation techniques
 
 # Encode categorical variables
 data = pd.get_dummies(data, columns=['diagnoses'])
@@ -16,7 +17,7 @@ data = pd.get_dummies(data, columns=['diagnoses'])
 from sklearn.preprocessing import StandardScaler
 scaler = StandardScaler()
 #NAO FAÇO A MINIMA O QUE É SUPOSTO SER ISTO
-data[['numerical_column1', 'numerical_column2']] = scaler.fit_transform(data[['numerical_column1', 'numerical_column2']]) 
+data[['age','TSH','T3', 'TT4', 'T4U', 'FTI', 'TBG']] = scaler.fit_transform(data[['age','TSH','T3', 'TT4', 'T4U', 'FTI', 'TBG']]) 
 
 X = data.drop('target_column', axis=1)   # Features
 y = data['target_column']                # Target variable
@@ -60,3 +61,4 @@ grid_search.fit(X_train, y_train)
 print("Best Parameters:", grid_search.best_params_)
 
 #FIM DO BLOCO DO CHAT GPT
+
