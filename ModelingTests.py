@@ -7,20 +7,59 @@ data = pd.read_csv('proj-data.csv')
 
 #BLOCO CHATGPT
 
-data.dropna(thresh=3, subset=['T3 measured:', 'TT4 measured:', 'T4U measured:', 'FTI measured:', 'TBG measured:'], inplace=True)  # Drop rows with missing values or use imputation techniques
-data.dropna(axis=1, thresh=3669, inplace=True)  # Drop columns with missing values or use imputation techniques
+# Remover as linhas com pouca informação
+data.dropna(thresh=3, subset=['T3 measured:', 'TT4 measured:', 'T4U measured:', 'FTI measured:', 'TBG measured:'], inplace=True)
+
+# Remover as colunas com pouca informação
+data.dropna(axis=1, thresh=3669, inplace=True)
+
+# Remover as colunas que indicam se algo foi medido ou não e a que tem a indentificação
+columns_to_drop = data.filter(like='measured').columns
+columns_to_drop.append('[record identification]')
+data.drop(columns_to_drop, axis=1, inplace=True)
+
+# Remover linhas com homens grávidos
+data = data[~((data['gender'] == 'M') & (data['pregnant'] == "t"))]
+
+def transform_diagnoses(df):
+    
+    hyperthyroid_conditions = ['A', 'B', 'C', 'D']
+    hypothyroid_conditions = ['E', 'F', 'G', 'H']
+    binding_protein = ['I', 'J']
+    general_health = ['K']
+    replacement_therapy = ['L', 'M', 'N']
+    antithyroid_treatment = ['O', 'P', 'Q']
+    other = ['R', 'S', 'T']
+    
+    df['diagnoses'].replace(hyperthyroid_conditions, 'hyperthyroid', inplace=True)
+    df['diagnoses'].replace(hypothyroid_conditions, 'hypothyroid', inplace=True)
+    df['diagnoses'].replace(binding_protein, 'binding protein', inplace=True)
+    df['diagnoses'].replace(general_health, 'general health', inplace=True)
+    df['diagnoses'].replace(replacement_therapy, 'replacement therapy', inplace=True)
+    df['diagnoses'].replace(antithyroid_treatment, 'antithyroid treatment', inplace=True)
+    df['diagnoses'].replace(other, 'miscellaneous', inplace=True)
+    
+    return df
 
 # Encode categorical variables
-data = pd.get_dummies(data, columns=['diagnoses'])
+data = transform_diagnoses(data)
+
+binary_cols = ['on thyroxine:', 'query on thyroxine:', 'on antithyroid medication:', 
+               'sick:', 'pregnant:', 'thyroid surgery:', 'I131 treatment:', 'query hypothyroid:',
+               'query hyperthyroid:', 'lithium:', 'goitre:', 'tumor:', 'hypopituitary:', 'psych:',
+               'referral source:', 'diagnoses']
+
+# Trocar os t e f e os diagnosticos para valores
+data = pd.get_dummies(data, columns=binary_cols)
 
 # Feature scaling (if necessary)
 from sklearn.preprocessing import StandardScaler
 scaler = StandardScaler()
 #NAO FAÇO A MINIMA O QUE É SUPOSTO SER ISTO
-data[['age','TSH','T3', 'TT4', 'T4U', 'FTI', 'TBG']] = scaler.fit_transform(data[['age','TSH','T3', 'TT4', 'T4U', 'FTI', 'TBG']]) 
+data[['age','TSH','T3', 'TT4', 'T4U', 'FTI', 'TBG']] = scaler.fit_transform(data) 
 
-X = data.drop('target_column', axis=1)   # Features
-y = data['target_column']                # Target variable
+X = data.drop('diagnoses', axis=1)   # Features
+y = data['diagnoses']                # Target variable
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
