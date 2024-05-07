@@ -4,7 +4,7 @@ from sklearn.model_selection import *
 from sklearn.metrics import *
 
 data = pd.read_csv('proj-data.csv')
-
+data.dropna(thresh=3, subset=['T3 measured:', 'TT4 measured:', 'T4U measured:', 'FTI measured:', 'TBG measured:'], inplace=True)
 #BLOCO CHATGPT
 
 # Remover as linhas com pouca informação
