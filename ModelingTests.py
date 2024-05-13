@@ -124,3 +124,100 @@ def present_statistics(y_test, preds):
     print("The F1 score is: %7.4f" % f1_score(y_test, preds, average='weighted'))
     print("The Matthews correlation coefficient is: %7.4f" % matthews_corrcoef(y_test, preds))
     print("-------------------------------------------------------------")
+
+#DECISION TREE CLASSIFIER
+
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.impute import SimpleImputer
+
+tree_model = DecisionTreeClassifier()
+tree_model.fit(X_train, y_train)
+
+tree_preds = tree_model.predict(X_test)
+present_statistics(y_test, tree_preds)
+
+imputer = SimpleImputer(strategy='constant', fill_value=-1)
+
+X_train_imputed = imputer.fit_transform(X_train)
+X_test_imputed = imputer.transform(X_test)
+
+tree_model.fit(X_train_imputed, y_train)
+
+tree_preds = tree_model.predict(X_test_imputed)
+present_statistics(y_test, tree_preds)
+
+y_train_flat = np.ravel(y_train)
+y_test_flat = np.ravel(y_test)
+
+#KNN
+
+from sklearn.neighbors import KNeighborsClassifier
+knn_model = KNeighborsClassifier(n_neighbors=3)
+knn_model.fit(X_train_imputed, y_train_flat)
+
+knn_preds = knn_model.predict(X_test_imputed)
+print(knn_model,":")
+present_statistics(y_test_flat, knn_preds)
+
+
+#SVC
+
+from sklearn.svm import SVC
+svc_model = SVC()
+svc_model.fit(X_train_imputed, y_train_flat)
+
+svc_preds = svc_model.predict(X_test_imputed)
+print(svc_model,":")
+present_statistics(y_test_flat, svc_preds)
+
+#GAUSIAN NAIVE BAYES
+
+from sklearn.naive_bayes import GaussianNB
+gaus_model = GaussianNB()
+gaus_model.fit(X_train_imputed, y_train_flat)
+
+gaus_preds = gaus_model.predict(X_test_imputed)
+print(gaus_model,":")
+present_statistics(y_test_flat, gaus_preds)
+
+#LOGISTIC REGRESSION
+
+from sklearn.linear_model import LogisticRegression
+
+# Scale the values for the logistic regression
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train_imputed)
+X_test_scaled = scaler.transform(X_test_imputed)
+
+logr_model = LogisticRegression(max_iter=1000)
+
+# Train models
+logr_model.fit(X_train_scaled, y_train_flat)
+
+logr_preds = logr_model.predict(X_test_scaled)
+print(logr_model,":")
+present_statistics(y_test_flat, logr_preds)
+
+#Os melhores modelos são o Decision Tree, KNeighbors e LogisticRegression()
+
+#Tuning
+
+#DECISION TREE CLASSIFIER
+tree_model = DecisionTreeClassifier()
+tree_model.fit(X_train, y_train)
+
+tree_preds = tree_model.predict(X_test)
+present_statistics(y_test, tree_preds)
+
+imputer = SimpleImputer(strategy='constant', fill_value=-1)
+
+X_train_imputed = imputer.fit_transform(X_train)
+X_test_imputed = imputer.transform(X_test)
+
+tree_model.fit(X_train_imputed, y_train)
+
+tree_preds = tree_model.predict(X_test_imputed)
+present_statistics(y_test, tree_preds)
+
+y_train_flat = np.ravel(y_train)
+y_test_flat = np.ravel(y_test)
