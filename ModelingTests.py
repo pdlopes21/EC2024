@@ -203,21 +203,28 @@ present_statistics(y_test_flat, logr_preds)
 #Tuning
 
 #DECISION TREE CLASSIFIER
+'''
+param_grid = {
+    'max_depth': [5,6,7,8,9,10],
+    'min_samples_split': [2, 3, 4],
+    'min_samples_leaf': [3,4,5],
+    'max_features': [None],
+    'criterion': ['gini','entropy']
+}
+
 tree_model = DecisionTreeClassifier()
-tree_model.fit(X_train, y_train)
 
-tree_preds = tree_model.predict(X_test)
+grid_search = GridSearchCV(estimator=tree_model, param_grid=param_grid, cv=5, scoring='f1_weighted')
+
+grid_search.fit(X_train, y_train)
+
+print("Best Parameters:", grid_search.best_params_)
+
+best_tree_model = grid_search.best_estimator_
+
+tree_preds = best_tree_model.predict(X_test)
+
 present_statistics(y_test, tree_preds)
 
-imputer = SimpleImputer(strategy='constant', fill_value=-1)
-
-X_train_imputed = imputer.fit_transform(X_train)
-X_test_imputed = imputer.transform(X_test)
-
-tree_model.fit(X_train_imputed, y_train)
-
-tree_preds = tree_model.predict(X_test_imputed)
-present_statistics(y_test, tree_preds)
-
-y_train_flat = np.ravel(y_train)
-y_test_flat = np.ravel(y_test)
+#Best Parameters: {'criterion': 'entropy', 'max_depth': 8, 'max_features': None, 'min_samples_leaf': 5, 'min_samples_split': 4}
+'''
