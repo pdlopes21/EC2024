@@ -207,10 +207,19 @@ present_statistics(y_test_flat, logr_preds)
 #Tuning
 
 #DECISION TREE CLASSIFIER
-'''
+for column in range(len(data.columns)):
+    if (column in Features_selected):
+        data.drop(index = column, axis=1, inplace=True)
+X = data.iloc[:,:-1]
+y = data.iloc[: , -1:]
+y = y.astype('int')
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25,random_state=0)
+
+
 param_grid = {
-    'max_depth': [5,6,7,8,9,10],
-    'min_samples_split': [2, 3, 4],
+    'max_depth': [4,5,6,7,8,9,10],
+    'min_samples_split': [2, 3, 4,5],
     'min_samples_leaf': [3,4,5],
     'max_features': [None],
     'criterion': ['gini','entropy']
@@ -231,7 +240,7 @@ tree_preds = best_tree_model.predict(X_test)
 present_statistics(y_test, tree_preds)
 
 #Best Parameters: {'criterion': 'entropy', 'max_depth': 8, 'max_features': None, 'min_samples_leaf': 5, 'min_samples_split': 4}
-'''
+
 
 '''
 #KNN
@@ -257,15 +266,17 @@ knn_preds = best_knn_model.predict(X_test_imputed)
 present_statistics(y_test_flat, knn_preds)
 '''
 
+
+'''
 #LOGISTIC REGRESSION
 
 param_grid = {
     'penalty': ['l1', 'l2'],
-    'C': [10000],
+    'C': [100],
     'solver': ['liblinear']
 }
 
-logreg_model = LogisticRegression(max_iter=10000)  # Increase max_iter if needed
+logreg_model = LogisticRegression(max_iter=1000)  # Increase max_iter if needed
 
 grid_search = GridSearchCV(estimator=logreg_model, param_grid=param_grid, cv=5, scoring='f1_weighted')
 
@@ -278,3 +289,4 @@ best_logreg_model = grid_search.best_estimator_
 logreg_preds = best_logreg_model.predict(X_test_imputed)
 
 present_statistics(y_test_flat, logreg_preds)
+'''
