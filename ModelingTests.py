@@ -96,7 +96,7 @@ features = np.argsort(importances)[::-1]
 #rfc2 = rfc2.fit(Xt_train,y_train)
 #importances = rfc2.feature_importances_
 #features = np.argsort(importances)[::-1]
- 
+''' 
 for f in range(features.size):
     print("%d: Feature %d (%f)" % (f + 1, features[f],  importances[features[f]]))
  
@@ -106,6 +106,7 @@ plt.xticks(range(X.shape[1]), X.columns,rotation=90)
 plt.bar(range(Xt_train.shape[1]), importances[features],color="b", yerr=std[features])
 plt.xlim([-1, Xt_train.shape[1]])
 plt.show()
+'''
 
 from sklearn.preprocessing import MinMaxScaler, PowerTransformer
 from sklearn.neighbors import KNeighborsClassifier
@@ -124,33 +125,34 @@ def present_statistics(y_test, preds):
     print("The F1 score is: %7.4f" % f1_score(y_test, preds, average='weighted'))
     print("The Matthews correlation coefficient is: %7.4f" % matthews_corrcoef(y_test, preds))
     print("-------------------------------------------------------------")
-
 #DECISION TREE CLASSIFIER
 
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.impute import SimpleImputer
 
+'''
 tree_model = DecisionTreeClassifier()
 tree_model.fit(X_train, y_train)
 
 tree_preds = tree_model.predict(X_test)
 present_statistics(y_test, tree_preds)
-
+'''
 imputer = SimpleImputer(strategy='constant', fill_value=-1)
 
 X_train_imputed = imputer.fit_transform(X_train)
 X_test_imputed = imputer.transform(X_test)
-
+'''
 tree_model.fit(X_train_imputed, y_train)
 
 tree_preds = tree_model.predict(X_test_imputed)
 present_statistics(y_test, tree_preds)
-
+'''
 y_train_flat = np.ravel(y_train)
 y_test_flat = np.ravel(y_test)
-
+'''
+''' 
 #KNN
-
+'''
 from sklearn.neighbors import KNeighborsClassifier
 knn_model = KNeighborsClassifier(n_neighbors=3)
 knn_model.fit(X_train_imputed, y_train_flat)
@@ -199,6 +201,8 @@ print(logr_model,":")
 present_statistics(y_test_flat, logr_preds)
 
 #Os melhores modelos são o Decision Tree, KNeighbors e LogisticRegression()
+'''
+
 
 #Tuning
 
@@ -228,3 +232,49 @@ present_statistics(y_test, tree_preds)
 
 #Best Parameters: {'criterion': 'entropy', 'max_depth': 8, 'max_features': None, 'min_samples_leaf': 5, 'min_samples_split': 4}
 '''
+
+'''
+#KNN
+param_grid = {
+    'n_neighbors': [3,11,13,15,17],
+    'weights': ['uniform', 'distance'],
+    'algorithm': ['auto', 'ball_tree', 'kd_tree', 'brute'],
+    'p': [1, 2]  # 1 for Manhattan distance, 2 for Euclidean distance
+}
+
+knn_model = KNeighborsClassifier()
+
+grid_search = GridSearchCV(estimator=knn_model, param_grid=param_grid, cv=5, scoring='f1_weighted')
+
+grid_search.fit(X_train_imputed, y_train_flat)
+
+print("Best Parameters:", grid_search.best_params_)
+
+best_knn_model = grid_search.best_estimator_
+
+knn_preds = best_knn_model.predict(X_test_imputed)
+
+present_statistics(y_test_flat, knn_preds)
+'''
+
+#LOGISTIC REGRESSION
+
+param_grid = {
+    'penalty': ['l1', 'l2'],
+    'C': [10000],
+    'solver': ['liblinear']
+}
+
+logreg_model = LogisticRegression(max_iter=10000)  # Increase max_iter if needed
+
+grid_search = GridSearchCV(estimator=logreg_model, param_grid=param_grid, cv=5, scoring='f1_weighted')
+
+grid_search.fit(X_train_imputed, y_train_flat)
+
+print("Best Parameters:", grid_search.best_params_)
+
+best_logreg_model = grid_search.best_estimator_
+
+logreg_preds = best_logreg_model.predict(X_test_imputed)
+
+present_statistics(y_test_flat, logreg_preds)
